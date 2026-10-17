@@ -32,13 +32,44 @@ Azov adapter продовжує задавати власний pin 1.21.1.
 
 ## Adoption
 
-Перший consumer — Azov, окремий PR з immutable commit SHA й module SHA-256,
-порівняльними tests старого та shared verifier, потім live no-op acceptance.
-У цьому PR consumers не переключаються. Mutable branches/tags або `latest`
-не є production pin. Наявний manifest v2 не змінюється.
+Перший consumer Azov підключив immutable commit SHA й module SHA-256
+та завершив live publisher/consumer no-op acceptance 2026-10-17.
+Наступні consumers переключаються окремими compatibility/acceptance PR.
+Mutable branches/tags або `latest` не є production pin.
+Наявний manifest v2 і source `contract.mjs` у legacy API PR не змінюються.
 
 Root-specific policy та `deny-blocked-v1` enforcement не переносяться до generic
 API. Standalone checks не доводять source authenticity, backend state freshness,
 binary/JSON equivalence, JSON structural consistency або actual cloud parity.
 Ці перевірки виконуються локальними guards/OPA/runtime acceptance consumers.
 Тести: [Bun contract tests](../../npm/test/opentofu/contract.test.mjs).
+
+## Legacy manifest API
+
+Окремий import `@nitra/ci-shared/opentofu/legacy`:
+`verifyLegacyManifest(manifest, expected, nowSeconds)` повертає `undefined`
+або кидає помилку без значень artifact. Source:
+`npm/src/opentofu/legacy-manifest.mjs`.
+[Рішення та rollout](../adr/opentofu-legacy-manifest.md).
+
+Manifest має п’ять непорожніх string fields: `repository`, `commit_sha`,
+`plan_run_id`, `created_epoch`, `plan_sha256`. Trusted `expected` містить
+repository, commit SHA, plan run ID та погоджений binary SHA-256 — не копії
+downloaded fields. Значення мають точно збігатися; digest — 64 lowercase hex.
+Creation epoch — десятковий string, age від 0 до 86400 секунд включно.
+Clock передається для tests; default — current epoch seconds.
+Як у Nitra baseline, невідомі додаткові fields не перевіряються.
+
+Це compatibility API для старого wire format, не послаблений schema-2 verifier.
+Не викликати його як fallback після `verifyManifest` failure. Немає OPA,
+root/backend/tool/lock/policy binding чи перевірки digest самого manifest.
+Локальний consumer має перевіряти exact binary bytes і власний plan guard.
+Нові schema-2 consumers продовжують використовувати `verifyManifest`;
+додавати штучні receipt або fields для адаптації legacy artifacts заборонено.
+
+Перший наступний consumer — Nitra, окремим PR після merge цього API.
+ABIE майбутню дату наразі допускає: його перехід потребує явного hardening
+review. Win потребує окремого workflow/identity review. Ця зміна shared API
+не є fleet rollout чи live acceptance.
+
+Перевірки: [legacy tests і frozen Nitra oracle](../../npm/test/opentofu/legacy-manifest.test.mjs).

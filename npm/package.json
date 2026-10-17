@@ -30,6 +30,10 @@
   "type": "module",
   "types": "./types/cli.d.mts",
   "exports": {
+    "./opentofu/legacy": {
+      "types": "./types/opentofu/legacy-manifest.d.mts",
+      "import": "./src/opentofu/legacy-manifest.mjs"
+    },
     "./opentofu": {
       "types": "./types/opentofu/contract.d.mts",
       "import": "./src/opentofu/contract.mjs"
