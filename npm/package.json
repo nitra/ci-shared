@@ -18,10 +18,24 @@
   "files": [
     "src",
     "types",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    "!**/*.test.*",
+    "!**/*.spec.*",
+    "!**/test/**",
+    "!**/tests/**",
+    "!**/fixtures/**",
+    "!**/__fixtures__/**",
+    "!**/__tests__/**"
   ],
   "type": "module",
   "types": "./types/cli.d.mts",
+  "exports": {
+    "./opentofu": {
+      "types": "./types/opentofu/contract.d.mts",
+      "import": "./src/opentofu/contract.mjs"
+    },
+    "./*": "./*"
+  },
   "publishConfig": {
     "access": "public"
   },

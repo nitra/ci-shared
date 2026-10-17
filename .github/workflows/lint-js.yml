@@ -25,6 +25,18 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  opentofu-contract:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-bun-deps
+      - name: Перевірити OpenTofu artifact contract без cloud access
+        run: bun test npm/test/opentofu
+
   eslint:
     runs-on: ubuntu-latest
     permissions:
